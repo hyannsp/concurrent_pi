@@ -25,20 +25,22 @@ def monte_carlo_concurrent(n_points: int, n_workers: int = 4) -> tuple[float, fl
     points_per_worker = n_points // n_workers
     start = timer()
 
-    with concurrent.futures.ProcessPoolExecutor(max_workers=n_workers) as executor:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=n_workers) as executor:
         results = executor.map(monte_carlo_worker, [points_per_worker] * n_workers)
 
     inside_circle = sum(results)
     return (inside_circle / n_points) * 4, timer() - start
 
 
-# Testando com 100 milhões de pontos
-number_of_points = 100000000
+# Testando com 1, 10 e 100 milhões de pontos
+number_of_points = [1_000_000,10_000_000, 100_000_000]
 
-print("===== Realizando Sequêncial =====")
-pi_value, duration = monte_carlo_seq(number_of_points)
-print(f"Valor de PI calculado para {number_of_points} pontos -> {pi_value}\nTempo total: {duration} segundos")
+for total_points in number_of_points:
+    print("===== Realizando Sequencial =====")
+    pi_value, duration = monte_carlo_seq(total_points)
+    print(f"Valor de π calculado para {format(total_points, '_').replace('_', '.')} pontos -> {pi_value}\nTempo total: {duration} segundos")
 
-print("===== Realizando Concorrência =====")
-pi_value, duration = monte_carlo_concurrent(number_of_points)
-print(f"Valor de PI calculado para {number_of_points} pontos -> {pi_value}\nTempo total: {duration} segundos")
+    print("===== Realizando Concorrência =====")
+    pi_value, duration = monte_carlo_concurrent(total_points)
+    print(f"Valor de π calculado para {format(total_points, '_').replace('_', '.')} pontos -> {pi_value}\nTempo total: {duration} segundos")
+    print("________________________________________________________________________")
